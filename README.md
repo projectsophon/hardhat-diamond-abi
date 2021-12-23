@@ -38,7 +38,7 @@ This plugin hooks Hardhat's internal `TASK_COMPILE_SOLIDITY_COMPILE_JOBS` task, 
 
 The reason for this is two-fold:
 
-1. TypeChain hooks this same hook, and we want to be able run before it. There aren't better places to hook into the compile pipeline, since most others are subject to the Hardhat cache mechanism.
+1. TypeChain hooks this same task, and we want to be able run before it. There aren't better places to hook into the compile pipeline, since most others are subject to the Hardhat cache mechanism.
 2. The Hardhat cache mechanism is **very** aggressive and will evict our Diamond ABI artifact unless we include our file before it generates the cache file. If we aren't included in the cache file, the Diamond ABI artifact will be removed from the `artifacts` directory the next time Hardhat is run.
 
 ## TypeChain
