@@ -1,0 +1,10 @@
+// Visit https://aka.ms/tsconfig.json for all config options
+{
+  "extends": "@projectsophon/tsconfig",
+  "compilerOptions": {
+    "rootDir": ".",
+    "outDir": "../dist"
+  },
+  // Ref https://stackoverflow.com/a/61467483
+  "references": [{ "path": "../" }]
+}

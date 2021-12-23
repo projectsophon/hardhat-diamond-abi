@@ -102,3 +102,10 @@ dist
 
 # TernJS port file
 .tern-port
+
+# Hardhat files
+test/fixture-projects/**/cache
+test/fixture-projects/**/artifacts
+
+# vscode
+.vscode
