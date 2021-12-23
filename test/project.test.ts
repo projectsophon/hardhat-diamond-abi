@@ -4,9 +4,9 @@ import { resetHardhatContext } from "hardhat/plugins-testing";
 import { TASK_CLEAN, TASK_COMPILE } from "hardhat/builtin-tasks/task-names";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function getAbiNames(abi: any[]) {
+function getAbiNames(abi: any[]): string[] {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return getAbiNames(abi);
+  return abi.map((abi) => abi.name);
 }
 
 describe("hardhat-diamond-abi", function () {
