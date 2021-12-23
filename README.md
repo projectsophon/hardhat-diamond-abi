@@ -8,7 +8,7 @@ The Diamond Pattern, or [EIP-2535](https://eips.ethereum.org/EIPS/eip-2535), is 
 
 Once registered, all functions can be accessed through the Diamond; however, you still need the ABI for the original Facet to make interacting easy. This plugin can be used to combine all the ABIs from your Facets into a single ABI to work with any functions in your Diamond.
 
-This is also very useful if you are using TypeChain and `@nomiclabs/hardhat-ethers ` because we ensure that TypeChain will generate types for your Diamond ABI, which can then be loaded using:
+This is also very useful if you are using TypeChain and `@nomiclabs/hardhat-ethers` because we ensure that TypeChain will generate types for your Diamond ABI, which can then be loaded using:
 
 ```js
 const diamond = await hre.ethers.getContractAt("MyDiamond", CONTRACT_ADDRESS);
