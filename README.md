@@ -71,7 +71,7 @@ j:~/best_dapp_ever/ $ tree
     └── FacetB.sol
 ```
 
-Now, when you can use `npx hardhat compile` to compile your contracts, a new ABI will exist in your artifacts.
+Now, when you use `npx hardhat compile` to compile your contracts, a new ABI will exist in your artifacts.
 
 ```
 j:~/best_dapp_ever/ $ tree
