@@ -39,9 +39,9 @@ describe("hardhat-diamond-abi", function () {
       assert.isEmpty(this.hre.config.diamondAbi.exclude);
       // filter stays undefined to avoid extra function calls
       assert.isUndefined(this.hre.config.diamondAbi.filter);
-      // dedupe
-      assert.isBoolean(this.hre.config.diamondAbi.dedupe);
-      assert.isTrue(this.hre.config.diamondAbi.dedupe);
+      // strict
+      assert.isBoolean(this.hre.config.diamondAbi.strict);
+      assert.isTrue(this.hre.config.diamondAbi.strict);
     });
   });
 
@@ -74,9 +74,9 @@ describe("hardhat-diamond-abi", function () {
       assert.sameOrderedMembers(this.hre.config.diamondAbi.exclude, ["ABCDEF"]);
       // filter
       assert.isFunction(this.hre.config.diamondAbi.filter);
-      // dedupe
-      assert.isBoolean(this.hre.config.diamondAbi.dedupe);
-      assert.isFalse(this.hre.config.diamondAbi.dedupe);
+      // strict
+      assert.isBoolean(this.hre.config.diamondAbi.strict);
+      assert.isFalse(this.hre.config.diamondAbi.strict);
     });
   });
 
@@ -133,12 +133,12 @@ describe("hardhat-diamond-abi", function () {
       }, /`filter` config must be a function if provided/);
     });
 
-    it("throws on non-boolean `dedupe`", function () {
-      process.chdir(path.join(__dirname, "fixture-projects", "invalid-throws-wrong-type-dedupe"));
+    it("throws on non-boolean `strict`", function () {
+      process.chdir(path.join(__dirname, "fixture-projects", "invalid-throws-wrong-type-strict"));
 
       assert.throws(() => {
         require("hardhat");
-      }, /`dedupe` config must be a boolean if provided/);
+      }, /`strict` config must be a boolean if provided/);
     });
   });
 
@@ -240,21 +240,23 @@ describe("hardhat-diamond-abi", function () {
       assert.sameMembers(getAbiNames(abi), ["foo"]);
     });
 
-    it("dedupes by default when generating an artifact", async function () {
-      process.chdir(path.join(__dirname, "fixture-projects", "hardhat-contracts-dedupe"));
+    it("validates against duplicates by default when generating an artifact", async function () {
+      process.chdir(path.join(__dirname, "fixture-projects", "hardhat-contracts-strict"));
 
       const hre = require("hardhat");
 
-      await hre.run(TASK_COMPILE);
+      try {
+        await hre.run(TASK_COMPILE);
+      } catch (err) {
+        assert.equal(err.message, "Failed to create HardhatDiamond ABI - `baz()` appears twice.");
+      }
 
       const artifactExists = await hre.artifacts.artifactExists(hre.config.diamondAbi.name);
-      assert.isTrue(artifactExists);
-      const { abi } = await hre.artifacts.readArtifact(hre.config.diamondAbi.name);
-      assert.sameMembers(getAbiNames(abi), ["foo", "baz", "bar"]);
+      assert.isFalse(artifactExists);
     });
 
-    it("can disable deduping when generating an artifact", async function () {
-      process.chdir(path.join(__dirname, "fixture-projects", "hardhat-contracts-no-dedupe"));
+    it("can disable validation against duplicates when generating an artifact", async function () {
+      process.chdir(path.join(__dirname, "fixture-projects", "hardhat-contracts-no-strict"));
 
       const hre = require("hardhat");
 
