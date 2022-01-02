@@ -114,8 +114,9 @@ module.exports = {
     filter: function (abiElement, index, fullAbi, fullyQualifiedName) {
       return abiElement.name !== "superSecret";
     },
-    // (optional) Whether exact duplicate sighashes should be deduplicated, defaults to true.
-    dedupe: true,
+    // (optional) Whether exact duplicate sighashes should cause an error to be thrown,
+    // defaults to true.
+    strict: true,
   },
 };
 ```
