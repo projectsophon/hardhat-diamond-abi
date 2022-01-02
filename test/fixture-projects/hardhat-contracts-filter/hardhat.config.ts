@@ -7,8 +7,8 @@ const config: HardhatUserConfig = {
   solidity: "0.8.10",
   diamondAbi: {
     name: "HardhatDiamond",
-    filter(contractName, abi) {
-      return abi.name === "foo";
+    filter(abiElement) {
+      return abiElement.name === "foo";
     },
   },
 };
