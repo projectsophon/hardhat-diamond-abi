@@ -7,7 +7,7 @@ const config: HardhatUserConfig = {
   solidity: "0.8.10",
   diamondAbi: {
     name: "HardhatDiamond",
-    dedupe: false,
+    strict: false,
   },
 };
 

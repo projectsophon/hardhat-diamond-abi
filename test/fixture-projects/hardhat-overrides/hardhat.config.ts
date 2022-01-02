@@ -12,7 +12,7 @@ const config: HardhatUserConfig = {
     filter() {
       return false;
     },
-    dedupe: false,
+    strict: false,
   },
 };
 

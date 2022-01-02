@@ -109,7 +109,7 @@ declare module "hardhat/types/config" {
       exclude?: string[];
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       filter?: (contractName: string, abi: any) => boolean;
-      dedupe?: boolean;
+      strict?: boolean;
     };
   }
 
@@ -121,13 +121,13 @@ declare module "hardhat/types/config" {
       exclude: string[];
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       filter?: (contractName: string, abi: any) => boolean;
-      dedupe: boolean;
+      strict: boolean;
     };
   }
 }
 
 extendConfig((config: HardhatConfig, userConfig: Readonly<HardhatUserConfig>) => {
-  const { name, include = [], exclude = [], filter, dedupe = true } = userConfig.diamondAbi ?? {};
+  const { name, include = [], exclude = [], filter, strict = true } = userConfig.diamondAbi ?? {};
 
   if (!name) {
     throw new HardhatPluginError(PLUGIN_NAME, "`name` config is required.");
@@ -149,8 +149,8 @@ extendConfig((config: HardhatConfig, userConfig: Readonly<HardhatUserConfig>) =>
     throw new HardhatPluginError(PLUGIN_NAME, "`filter` config must be a function if provided.");
   }
 
-  if (typeof dedupe !== "boolean") {
-    throw new HardhatPluginError(PLUGIN_NAME, "`dedupe` config must be a boolean if provided.");
+  if (typeof strict !== "boolean") {
+    throw new HardhatPluginError(PLUGIN_NAME, "`strict` config must be a boolean if provided.");
   }
 
   config.diamondAbi = {
@@ -158,7 +158,7 @@ extendConfig((config: HardhatConfig, userConfig: Readonly<HardhatUserConfig>) =>
     include,
     exclude,
     filter,
-    dedupe,
+    strict,
   };
 });
 
@@ -215,28 +215,27 @@ export async function generateDiamondAbi(
     );
   }
 
-  let abi = mergedAbis;
-
-  if (config.dedupe) {
-    // Dedupe the ABI
-    // This generally shouldn't happen, but consumers might choose to limit or filter
-    // some functions they cut into the Diamond. We don't have a good way to determine
-    // this before a deployment, so we remove exact duplicates (by default).
-    const diamondAbiMap = new Map();
+  if (config.strict) {
+    // Validate the ABI if `strict` option is `true`
+    // Consumers may opt to validate their Diamond doesn't contain duplicate
+    // functions before a deployment. There isn't a great way to determine
+    // this before a deployment, but `diamondCut` will fail if you try to cut
+    // multiple functions (thus failing a deploy).
+    const diamondAbiSet = new Set();
 
     mergedAbis.forEach((abi) => {
       const sighash = Fragment.fromObject(abi).format(FormatTypes.sighash);
-      if (diamondAbiMap.has(sighash)) {
-        log(`Deduplicating ${sighash} because the same signature was included twice.`);
+      if (diamondAbiSet.has(sighash)) {
+        throw new HardhatPluginError(
+          PLUGIN_NAME,
+          `Failed to create ${config.name} ABI - \`${sighash}\` appears twice.`
+        );
       }
-      diamondAbiMap.set(sighash, abi);
+      diamondAbiSet.add(sighash);
     });
-
-    // Convert the Map back into an array of just the ABI values
-    abi = Array.from(diamondAbiMap.values());
   }
 
-  const compilationJob = new DiamondAbiCompilationJob(config.name, abi);
+  const compilationJob = new DiamondAbiCompilationJob(config.name, mergedAbis);
   const file = compilationJob.getFile();
   const artifact = compilationJob.getArtifact();
 
