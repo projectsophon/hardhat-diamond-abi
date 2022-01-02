@@ -108,7 +108,7 @@ declare module "hardhat/types/config" {
       include?: string[];
       exclude?: string[];
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      filter?: (contractName: string, abi: any) => boolean;
+      filter?: (abiElement: any, index: number, abi: any[], fullyQualifiedName: string) => boolean;
       dedupe?: boolean;
     };
   }
@@ -120,7 +120,7 @@ declare module "hardhat/types/config" {
       include: string[];
       exclude: string[];
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      filter?: (contractName: string, abi: any) => boolean;
+      filter?: (abiElement: any, index: number, abi: any[], fullyQualifiedName: string) => boolean;
       dedupe: boolean;
     };
   }
@@ -201,13 +201,13 @@ export async function generateDiamondAbi(
     const { abi } = await hre.artifacts.readArtifact(contractName);
 
     mergedAbis.push(
-      ...abi.filter((abi) => {
-        if (abi.type === "constructor") {
+      ...abi.filter((abiElement, index, abi) => {
+        if (abiElement.type === "constructor") {
           return false;
         }
 
         if (typeof config.filter === "function") {
-          return config.filter(contractName, abi);
+          return config.filter(abiElement, index, abi, contractName);
         }
 
         return true;
