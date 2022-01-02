@@ -19,6 +19,7 @@
   "scripts": {
     "prepare": "yarn build && cpy ./src/contract.sol dist",
     "lint": "eslint .",
+    "pretest": "yarn build",
     "test": "mocha --exit --recursive 'test/**/*.test.ts'",
     "format": "prettier --write .",
     "build": "tsc --build src",
