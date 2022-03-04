@@ -194,6 +194,11 @@ export async function generateDiamondAbi(
       log(`Skipping ${contractName} because it did matched an \`exclude\` pattern.`);
       continue;
     }
+    
+    // this should be the output filename, but this will work too
+    if (contractName.match("hardhat-diamond-abi\/.*")) {
+        continue;
+    }
 
     // debug(including contractName in Name ABI)
     log(`Including ${contractName} in your ${config.name} ABI.`);
