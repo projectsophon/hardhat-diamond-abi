@@ -4,9 +4,9 @@ require("../../../");
 
 const config = {
   solidity: "0.8.10",
-  diamondAbi: {
+  diamondAbi: [{
     include: ["Facet"],
-  },
+  }],
 };
 
 module.exports = config;

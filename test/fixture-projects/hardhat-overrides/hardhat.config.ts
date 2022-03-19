@@ -5,7 +5,7 @@ import "../../../";
 
 const config: HardhatUserConfig = {
   solidity: "0.8.10",
-  diamondAbi: {
+  diamondAbi: [{
     name: "HardhatOverrides",
     include: ["Facet"],
     exclude: ["ABCDEF"],
@@ -13,7 +13,7 @@ const config: HardhatUserConfig = {
       return false;
     },
     strict: false,
-  },
+  }],
 };
 
 export default config;

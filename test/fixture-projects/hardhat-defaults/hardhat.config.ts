@@ -5,9 +5,9 @@ import "../../../";
 
 const config: HardhatUserConfig = {
   solidity: "0.8.10",
-  diamondAbi: {
+  diamondAbi: [{
     name: "HardhatDefaults",
-  },
+  }],
 };
 
 export default config;

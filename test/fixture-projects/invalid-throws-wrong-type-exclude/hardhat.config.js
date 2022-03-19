@@ -4,10 +4,10 @@ require("../../../");
 
 const config = {
   solidity: "0.8.10",
-  diamondAbi: {
+  diamondAbi: [{
     name: "FooBar",
     exclude: "Wrong",
-  },
+  }],
 };
 
 module.exports = config;
