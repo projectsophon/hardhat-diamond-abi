@@ -196,7 +196,7 @@ export async function generateDiamondAbi(
     }
     
     // this should be the output filename, but this will work too
-    if (contractName.match("hardhat-diamond-abi\/.*")) {
+    if (contractName.startsWith(PLUGIN_NAME)) {
         continue;
     }
 
