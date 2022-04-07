@@ -18,8 +18,9 @@ import { CompilationJob } from "hardhat/internal/solidity/compilation-job";
 import { ResolvedFile } from "hardhat/internal/solidity/resolver";
 
 import * as pkg from "../package.json";
+import * as fs from "fs";
 
-export const PLUGIN_NAME = pkg.name;
+export const PLUGIN_NAME = "hardhat-diamond-abi";
 export const PLUGIN_VERSION = pkg.version;
 
 const { Fragment, FormatTypes } = utils;
@@ -51,6 +52,11 @@ class DiamondAbiCompilationJob extends CompilationJob {
 
     const sourceName = `${this.pluginName}/${this.artifactName}.sol`;
 
+    // File destination.txt will be created or overwritten by default.
+    fs.copyFile(path.join(__dirname, "contract.sol"), path.join(__dirname, "contract" + delta + ".sol"), (err) => {
+      if (err) throw err;
+    });
+    
     const absolutePath = path.join(__dirname, "contract" + delta + ".sol");
     const content = { rawContent: "", imports: [], versionPragmas: [] };
     const contentHash = createHash("md5").update(JSON.stringify(abi)).digest("hex");
