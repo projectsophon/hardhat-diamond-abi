@@ -194,10 +194,10 @@ export async function generateDiamondAbi(
       log(`Skipping ${contractName} because it did matched an \`exclude\` pattern.`);
       continue;
     }
-    
+
     // this should be the output filename, but this will work too
     if (contractName.startsWith(PLUGIN_NAME)) {
-        continue;
+      continue;
     }
 
     // debug(including contractName in Name ABI)
