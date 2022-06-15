@@ -268,7 +268,7 @@ describe("hardhat-diamond-abi", function () {
       assert.sameMembers(getAbiNames(abi), ["foo", "baz", "bar", "baz"]);
     });
 
-    it.only("doesn't include our generated ABI when run again", async function () {
+    it("doesn't include our generated ABI when run again", async function () {
       process.chdir(path.join(__dirname, "fixture-projects", "avoid-reprocessing"));
 
       const hre = require("hardhat");

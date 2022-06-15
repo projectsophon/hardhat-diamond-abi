@@ -197,6 +197,7 @@ export async function generateDiamondAbi(
 
     // this should be the output filename, but this will work too
     if (contractName.startsWith(PLUGIN_NAME)) {
+      log(`Skipping ${contractName} because it is the stub ABI produced by ${PLUGIN_NAME}.`);
       continue;
     }
 
