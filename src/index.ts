@@ -18,10 +18,10 @@ import { CompilationJob } from "hardhat/internal/solidity/compilation-job";
 import { ResolvedFile } from "hardhat/internal/solidity/resolver";
 
 import * as pkg from "../package.json";
-import * as fs from "fs";
 
-export const PLUGIN_NAME = "hardhat-diamond-abi";
+export const PLUGIN_NAME = pkg.name;
 export const PLUGIN_VERSION = pkg.version;
+const CONTRACT_NAME = "HardhatDiamondABI.sol";
 
 const { Fragment, FormatTypes } = utils;
 
@@ -39,6 +39,19 @@ type ArtifactsEmittedPerJob = Array<{
   artifactsEmittedPerFile: ArtifactsEmittedPerFile;
 }>;
 
+function createArtifact(artifactName: string, abi: unknown[]) {
+  return {
+    _format: "hh-sol-artifact-1",
+    contractName: artifactName,
+    sourceName: `${PLUGIN_NAME}/${CONTRACT_NAME}`,
+    abi: abi,
+    deployedBytecode: "",
+    bytecode: "",
+    linkReferences: {},
+    deployedLinkReferences: {},
+  } as const;
+}
+
 // This is our custom CompilationJob with information about the Diamond ABI
 class DiamondAbiCompilationJob extends CompilationJob {
   private pluginName = PLUGIN_NAME;
@@ -46,20 +59,18 @@ class DiamondAbiCompilationJob extends CompilationJob {
 
   private _file: ResolvedFile;
 
-  constructor(private artifactName: string, delta: string, private abi: unknown[]) {
+  private artifacts: ReturnType<typeof createArtifact>[] = [];
+
+  constructor() {
     // Dummy solidity version that can never be valid
     super({ version: "X.X.X", settings: {} });
 
-    const sourceName = `${this.pluginName}/${this.artifactName}.sol`;
+    const sourceName = `${this.pluginName}/${CONTRACT_NAME}`;
 
-    // File destination.txt will be created or overwritten by default.
-    fs.copyFile(path.join(__dirname, "contract.sol"), path.join(__dirname, "contract" + delta + ".sol"), (err) => {
-      if (err) throw err;
-    });
-    
-    const absolutePath = path.join(__dirname, "contract" + delta + ".sol");
+    const absolutePath = path.join(__dirname, "contract.sol");
     const content = { rawContent: "", imports: [], versionPragmas: [] };
-    const contentHash = createHash("md5").update(JSON.stringify(abi)).digest("hex");
+    // Dummy a content hash with the plugin name & version
+    const contentHash = createHash("md5").update(`${this.pluginName}_${this.pluginVersion}`).digest("hex");
     const lastModificationDate = new Date();
 
     this._file = new ResolvedFile(
@@ -89,80 +100,79 @@ class DiamondAbiCompilationJob extends CompilationJob {
     return this._file;
   }
 
-  getArtifact() {
-    return {
-      _format: "hh-sol-artifact-1",
-      contractName: this.artifactName,
-      sourceName: `${this.pluginName}/${this.artifactName}.sol`,
-      abi: this.abi,
-      deployedBytecode: "",
-      bytecode: "",
-      linkReferences: {},
-      deployedLinkReferences: {},
-    };
+  addArtifact(artifact: ReturnType<typeof createArtifact>) {
+    this.artifacts.push(artifact);
   }
+
+  getArtifactsEmitted() {
+    return this.artifacts.map((artifact) => artifact.contractName);
+  }
+}
+
+interface DiamondAbiUserConfig {
+  name: string;
+  // We can't accept RegExp until https://github.com/nomiclabs/hardhat/issues/2181
+  include?: string[];
+  exclude?: string[];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  filter?: (abiElement: any, index: number, abi: any[], fullyQualifiedName: string) => boolean;
+  strict?: boolean;
 }
 
 // Add our types to the Hardhat config
 declare module "hardhat/types/config" {
-  interface DiamondAbiConfig {
-    name: string;
-    // We can't accept RegExp until https://github.com/nomiclabs/hardhat/issues/2181
-    include?: string[];
-    exclude?: string[];
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    filter?: (abiElement: any, index: number, abi: any[], fullyQualifiedName: string) => boolean;
-    strict?: boolean;
-  }
   interface HardhatUserConfig {
-    diamondAbi?: DiamondAbiConfig[];
+    diamondAbi?: DiamondAbiUserConfig | DiamondAbiUserConfig[];
   }
 
   interface HardhatConfig {
-    diamondAbi: DiamondAbiConfig[];
+    diamondAbi: {
+      name: string;
+      // We can't accept RegExp until https://github.com/nomiclabs/hardhat/issues/2181
+      include: string[];
+      exclude: string[];
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      filter?: (abiElement: any, index: number, abi: any[], fullyQualifiedName: string) => boolean;
+      strict: boolean;
+    }[];
   }
 }
 
-extendConfig((parsedConfig: HardhatConfig, userConfig: Readonly<HardhatUserConfig>) => {
-  if (userConfig.diamondAbi) {
-    const configArray = userConfig.diamondAbi;
-    for (const i in configArray) {
-      const config = configArray[i];
-      const {name, include = [], exclude = [], filter, strict = true} = config ?? {};
+extendConfig((config: HardhatConfig, userConfig: Readonly<HardhatUserConfig>) => {
+  config.diamondAbi = [userConfig.diamondAbi].flat().map(function (userConfig) {
+    const { name, include = [], exclude = [], filter, strict = true } = userConfig ?? {};
 
-      if (!name) {
-        throw new HardhatPluginError(PLUGIN_NAME, "`name` config is required.");
-      }
-
-      if (typeof name !== "string") {
-        throw new HardhatPluginError(PLUGIN_NAME, "`name` config must be a string.");
-      }
-
-      if (include && !Array.isArray(include)) {
-        throw new HardhatPluginError(PLUGIN_NAME, "`include` config must be an array if provided.");
-      }
-
-      if (exclude && !Array.isArray(exclude)) {
-        throw new HardhatPluginError(PLUGIN_NAME, "`exclude` config must be an array if provided.");
-      }
-
-      if (filter && typeof filter !== "function") {
-        throw new HardhatPluginError(PLUGIN_NAME, "`filter` config must be a function if provided.");
-      }
-
-      if (typeof strict !== "boolean") {
-        throw new HardhatPluginError(PLUGIN_NAME, "`strict` config must be a boolean if provided.");
-      }
-
-      parsedConfig.diamondAbi[i] = {
-        name,
-        include,
-        exclude,
-        filter,
-        strict,
-      };
+    if (!name) {
+      throw new HardhatPluginError(PLUGIN_NAME, "`name` config is required.");
     }
-  }
+
+    if (typeof name !== "string") {
+      throw new HardhatPluginError(PLUGIN_NAME, "`name` config must be a string.");
+    }
+
+    if (include && !Array.isArray(include)) {
+      throw new HardhatPluginError(PLUGIN_NAME, "`include` config must be an array if provided.");
+    }
+
+    if (exclude && !Array.isArray(exclude)) {
+      throw new HardhatPluginError(PLUGIN_NAME, "`exclude` config must be an array if provided.");
+    }
+
+    if (filter && typeof filter !== "function") {
+      throw new HardhatPluginError(PLUGIN_NAME, "`filter` config must be a function if provided.");
+    }
+
+    if (typeof strict !== "boolean") {
+      throw new HardhatPluginError(PLUGIN_NAME, "`strict` config must be a boolean if provided.");
+    }
+    return {
+      name,
+      include,
+      exclude,
+      filter,
+      strict,
+    };
+  });
 });
 
 // We ONLY hook this task, instead of providing a separate task to run, because
@@ -180,14 +190,12 @@ export async function generateDiamondAbi(
   if (out.artifactsEmittedPerJob.length === 0) {
     return out;
   }
-  
-  const output = [...out.artifactsEmittedPerJob];
 
-  const configArray = hre.config.diamondAbi;
-  for (const i in configArray) {
-    const config = configArray[i];
+  const compilationJob = new DiamondAbiCompilationJob();
 
-    const contracts = await hre.artifacts.getAllFullyQualifiedNames();
+  const contracts = await hre.artifacts.getAllFullyQualifiedNames();
+
+  for (const config of hre.config.diamondAbi) {
     const mergedAbis = [];
 
     for (const contractName of contracts) {
@@ -205,7 +213,7 @@ export async function generateDiamondAbi(
       // debug(including contractName in Name ABI)
       log(`Including ${contractName} in your ${config.name} ABI.`);
 
-      const {abi} = await hre.artifacts.readArtifact(contractName);
+      const { abi } = await hre.artifacts.readArtifact(contractName);
 
       mergedAbis.push(
         ...abi.filter((abiElement, index, abi) => {
@@ -242,28 +250,29 @@ export async function generateDiamondAbi(
       });
     }
 
-    const compilationJob = new DiamondAbiCompilationJob(config.name, i, mergedAbis);
-    const file = compilationJob.getFile();
-    const artifact = compilationJob.getArtifact();
+    const artifact = createArtifact(config.name, mergedAbis);
 
     // Save into the Hardhat cache so artifact utilities can load it
     await hre.artifacts.saveArtifactAndDebugFile(artifact);
 
-    output.push(
-      // Add as another job to the list
+    compilationJob.addArtifact(artifact);
+  }
+
+  const file = compilationJob.getFile();
+  const artifactsEmitted = compilationJob.getArtifactsEmitted();
+
+  return {
+    artifactsEmittedPerJob: [
+      ...out.artifactsEmittedPerJob, // Add as another job to the list
       {
         compilationJob,
         artifactsEmittedPerFile: [
           {
             file,
-            artifactsEmitted: [config.name],
+            artifactsEmitted,
           },
         ],
-      }
-    );
-  }
-
-  return {
-    artifactsEmittedPerJob: output,
+      },
+    ],
   };
 }

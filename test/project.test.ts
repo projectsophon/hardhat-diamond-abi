@@ -224,13 +224,13 @@ describe("hardhat-diamond-abi", function () {
       // Check the first diamond.
       const artifactExists1 = await hre.artifacts.artifactExists(hre.config.diamondAbi[0].name);
       assert.isTrue(artifactExists1);
-      const { abi:abi1 } = await hre.artifacts.readArtifact(hre.config.diamondAbi[0].name);
+      const { abi: abi1 } = await hre.artifacts.readArtifact(hre.config.diamondAbi[0].name);
       assert.sameMembers(getAbiNames(abi1), ["foo"]);
-      
+
       // Check the second diamond.
       const artifactExists2 = await hre.artifacts.artifactExists(hre.config.diamondAbi[1].name);
       assert.isTrue(artifactExists2);
-      const { abi:abi2 } = await hre.artifacts.readArtifact(hre.config.diamondAbi[1].name);
+      const { abi: abi2 } = await hre.artifacts.readArtifact(hre.config.diamondAbi[1].name);
       assert.sameMembers(getAbiNames(abi2), ["bar"]);
     });
 
