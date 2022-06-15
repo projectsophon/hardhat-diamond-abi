@@ -1,5 +1,12 @@
 # Changelog
 
+### [2.0.1](https://www.github.com/projectsophon/hardhat-diamond-abi/compare/v2.0.0...v2.0.1) (2022-06-15)
+
+
+### Bug Fixes
+
+* Avoid reprocessing the ABI created by plugin ([#10](https://www.github.com/projectsophon/hardhat-diamond-abi/issues/10)) ([5c15630](https://www.github.com/projectsophon/hardhat-diamond-abi/commit/5c15630dd78a1a6dd02e7358b17941e4d978cb06))
+
 ## [2.0.0](https://www.github.com/projectsophon/hardhat-diamond-abi/compare/v1.0.0...v2.0.0) (2022-01-02)
 
 ### ⚠ BREAKING CHANGES
