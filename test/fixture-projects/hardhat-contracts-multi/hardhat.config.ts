@@ -17,7 +17,7 @@ const config: HardhatUserConfig = {
     {
       name: "TestDiamond3",
       include: ["TestB"],
-    }
+    },
   ],
 };
 
