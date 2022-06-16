@@ -21,6 +21,8 @@ import * as pkg from "../package.json";
 
 export const PLUGIN_NAME = pkg.name;
 export const PLUGIN_VERSION = pkg.version;
+// An empty contract file is provided in the plugin otherwise Hardhat will eject us from the cache
+export const CONTRACT_PATH = path.join(__dirname, "contract.sol");
 const CONTRACT_NAME = "HardhatDiamondABI.sol";
 
 const { Fragment, FormatTypes } = utils;
@@ -67,7 +69,7 @@ class DiamondAbiCompilationJob extends CompilationJob {
 
     const sourceName = `${this.pluginName}/${CONTRACT_NAME}`;
 
-    const absolutePath = path.join(__dirname, "contract.sol");
+    const absolutePath = CONTRACT_PATH;
     const content = { rawContent: "", imports: [], versionPragmas: [] };
     // Dummy a content hash with the plugin name & version
     const contentHash = createHash("md5").update(`${this.pluginName}_${this.pluginVersion}`).digest("hex");
