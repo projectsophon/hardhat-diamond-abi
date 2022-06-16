@@ -326,5 +326,26 @@ describe("hardhat-diamond-abi", function () {
       const { abi } = await hre.artifacts.readArtifact(hre.config.diamondAbi[0].name);
       assert.sameMembers(getAbiNames(abi), ["foo", "baz", "bar", "baz"]);
     });
+
+    it("doesn't include our generated ABI when run again", async function () {
+      process.chdir(path.join(__dirname, "fixture-projects", "avoid-reprocessing"));
+
+      const hre = require("hardhat");
+
+      await hre.run(TASK_COMPILE);
+
+      const artifactExists = await hre.artifacts.artifactExists(hre.config.diamondAbi[0].name);
+      assert.isTrue(artifactExists);
+
+      try {
+        // We force a 2nd build because we don't change any code (but a normal project would)
+        await hre.run(TASK_COMPILE, { force: true });
+      } catch (err) {
+        assert.fail(err.message);
+      }
+
+      const { abi } = await hre.artifacts.readArtifact(hre.config.diamondAbi[0].name);
+      assert.sameMembers(getAbiNames(abi), ["foo", "bar"]);
+    });
   });
 });
