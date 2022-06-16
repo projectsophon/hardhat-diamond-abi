@@ -1,6 +1,6 @@
 {
   "name": "hardhat-diamond-abi",
-  "version": "2.0.1",
+  "version": "3.0.0",
   "description": "Hardhat plugin to combine multiple ABIs into a Diamond ABI artifact.",
   "author": "Blaine Bublitz <blaine.bublitz@gmail.com> (https://github.com/phated)",
   "repository": "projectsophon/hardhat-diamond-abi",
