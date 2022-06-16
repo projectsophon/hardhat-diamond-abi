@@ -265,7 +265,8 @@ export async function generateDiamondAbi(
 
   return {
     artifactsEmittedPerJob: [
-      ...out.artifactsEmittedPerJob, // Add as another job to the list
+      ...out.artifactsEmittedPerJob,
+      // Add as another job to the list
       {
         compilationJob,
         artifactsEmittedPerFile: [
