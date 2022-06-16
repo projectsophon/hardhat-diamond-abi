@@ -26,22 +26,22 @@ describe("hardhat-diamond-abi", function () {
     });
 
     it("requires a `name` to be set", function () {
-      assert.isString(this.hre.config.diamondAbi.name);
-      assert.equal(this.hre.config.diamondAbi.name, "HardhatDefaults");
+      assert.isString(this.hre.config.diamondAbi[0].name);
+      assert.equal(this.hre.config.diamondAbi[0].name, "HardhatDefaults");
     });
 
     it("defaults undefined config", function () {
       // include
-      assert.isArray(this.hre.config.diamondAbi.include);
-      assert.isEmpty(this.hre.config.diamondAbi.include);
+      assert.isArray(this.hre.config.diamondAbi[0].include);
+      assert.isEmpty(this.hre.config.diamondAbi[0].include);
       // exclude
-      assert.isArray(this.hre.config.diamondAbi.exclude);
-      assert.isEmpty(this.hre.config.diamondAbi.exclude);
+      assert.isArray(this.hre.config.diamondAbi[0].exclude);
+      assert.isEmpty(this.hre.config.diamondAbi[0].exclude);
       // filter stays undefined to avoid extra function calls
-      assert.isUndefined(this.hre.config.diamondAbi.filter);
+      assert.isUndefined(this.hre.config.diamondAbi[0].filter);
       // strict
-      assert.isBoolean(this.hre.config.diamondAbi.strict);
-      assert.isTrue(this.hre.config.diamondAbi.strict);
+      assert.isBoolean(this.hre.config.diamondAbi[0].strict);
+      assert.isTrue(this.hre.config.diamondAbi[0].strict);
     });
   });
 
@@ -61,22 +61,61 @@ describe("hardhat-diamond-abi", function () {
     });
 
     it("requires a `name` to be set", function () {
-      assert.isString(this.hre.config.diamondAbi.name);
-      assert.equal(this.hre.config.diamondAbi.name, "HardhatOverrides");
+      assert.isString(this.hre.config.diamondAbi[0].name);
+      assert.equal(this.hre.config.diamondAbi[0].name, "HardhatOverrides");
     });
 
-    it("defaults undefined config", function () {
+    it("overrides other config", function () {
       // include
-      assert.isArray(this.hre.config.diamondAbi.include);
-      assert.sameOrderedMembers(this.hre.config.diamondAbi.include, ["Facet"]);
+      assert.isArray(this.hre.config.diamondAbi[0].include);
+      assert.sameOrderedMembers(this.hre.config.diamondAbi[0].include, ["Facet"]);
       // exclude
-      assert.isArray(this.hre.config.diamondAbi.exclude);
-      assert.sameOrderedMembers(this.hre.config.diamondAbi.exclude, ["ABCDEF"]);
+      assert.isArray(this.hre.config.diamondAbi[0].exclude);
+      assert.sameOrderedMembers(this.hre.config.diamondAbi[0].exclude, ["ABCDEF"]);
       // filter
-      assert.isFunction(this.hre.config.diamondAbi.filter);
+      assert.isFunction(this.hre.config.diamondAbi[0].filter);
       // strict
-      assert.isBoolean(this.hre.config.diamondAbi.strict);
-      assert.isFalse(this.hre.config.diamondAbi.strict);
+      assert.isBoolean(this.hre.config.diamondAbi[0].strict);
+      assert.isFalse(this.hre.config.diamondAbi[0].strict);
+    });
+  });
+
+  describe("Test multi config", function () {
+    beforeEach("Loading hardhat environment", function () {
+      process.chdir(path.join(__dirname, "fixture-projects", "hardhat-multi-config"));
+
+      this.hre = require("hardhat");
+    });
+
+    afterEach("Resetting hardhat", function () {
+      resetHardhatContext();
+    });
+
+    it("adds `diamondAbi` to the config", function () {
+      assert.isDefined(this.hre.config.diamondAbi);
+    });
+
+    it("requires a `name` to be set", function () {
+      for (const [idx, config] of this.hre.config.diamondAbi.entries()) {
+        assert.isString(config.name);
+        assert.equal(config.name, `HardhatOverrides_${idx}`);
+      }
+    });
+
+    it("overrides other config", function () {
+      for (const [idx, config] of this.hre.config.diamondAbi.entries()) {
+        // include
+        assert.isArray(config.include);
+        assert.sameOrderedMembers(config.include, [`Facet_${idx}`]);
+        // exclude
+        assert.isArray(config.exclude);
+        assert.sameOrderedMembers(config.exclude, [`Exclude_${idx}`]);
+        // filter
+        assert.isFunction(config.filter);
+        // strict
+        assert.isBoolean(config.strict);
+        assert.isFalse(config.strict);
+      }
     });
   });
 
@@ -158,7 +197,7 @@ describe("hardhat-diamond-abi", function () {
 
       await hre.run(TASK_COMPILE);
 
-      const artifactExists = await hre.artifacts.artifactExists(hre.config.diamondAbi.name);
+      const artifactExists = await hre.artifacts.artifactExists(hre.config.diamondAbi[0].name);
       assert.isFalse(artifactExists);
     });
 
@@ -169,9 +208,9 @@ describe("hardhat-diamond-abi", function () {
 
       await hre.run(TASK_COMPILE);
 
-      const artifactExists = await hre.artifacts.artifactExists(hre.config.diamondAbi.name);
+      const artifactExists = await hre.artifacts.artifactExists(hre.config.diamondAbi[0].name);
       assert.isTrue(artifactExists);
-      const { abi } = await hre.artifacts.readArtifact(hre.config.diamondAbi.name);
+      const { abi } = await hre.artifacts.readArtifact(hre.config.diamondAbi[0].name);
       assert.sameMembers(getAbiNames(abi), ["foo", "bar"]);
     });
 
@@ -182,9 +221,9 @@ describe("hardhat-diamond-abi", function () {
 
       await hre.run(TASK_COMPILE);
 
-      const artifactExists = await hre.artifacts.artifactExists(hre.config.diamondAbi.name);
+      const artifactExists = await hre.artifacts.artifactExists(hre.config.diamondAbi[0].name);
       assert.isTrue(artifactExists);
-      const { abi } = await hre.artifacts.readArtifact(hre.config.diamondAbi.name);
+      const { abi } = await hre.artifacts.readArtifact(hre.config.diamondAbi[0].name);
       assert.sameMembers(getAbiNames(abi), ["foo", "bar"]);
     });
 
@@ -195,9 +234,9 @@ describe("hardhat-diamond-abi", function () {
 
       await hre.run(TASK_COMPILE);
 
-      const artifactExists = await hre.artifacts.artifactExists(hre.config.diamondAbi.name);
+      const artifactExists = await hre.artifacts.artifactExists(hre.config.diamondAbi[0].name);
       assert.isTrue(artifactExists);
-      const { abi } = await hre.artifacts.readArtifact(hre.config.diamondAbi.name);
+      const { abi } = await hre.artifacts.readArtifact(hre.config.diamondAbi[0].name);
       assert.sameMembers(getAbiNames(abi), ["Foo", "ErrFoo", "foo", "Bar", "ErrBar", "bar"]);
     });
 
@@ -208,10 +247,30 @@ describe("hardhat-diamond-abi", function () {
 
       await hre.run(TASK_COMPILE);
 
-      const artifactExists = await hre.artifacts.artifactExists(hre.config.diamondAbi.name);
+      const artifactExists = await hre.artifacts.artifactExists(hre.config.diamondAbi[0].name);
       assert.isTrue(artifactExists);
-      const { abi } = await hre.artifacts.readArtifact(hre.config.diamondAbi.name);
+      const { abi } = await hre.artifacts.readArtifact(hre.config.diamondAbi[0].name);
       assert.sameMembers(getAbiNames(abi), ["foo"]);
+    });
+
+    it("outputs multiple diamonds", async function () {
+      process.chdir(path.join(__dirname, "fixture-projects", "hardhat-contracts-multi"));
+
+      const hre = require("hardhat");
+
+      await hre.run(TASK_COMPILE);
+
+      // Check the first diamond.
+      const artifactExists1 = await hre.artifacts.artifactExists(hre.config.diamondAbi[0].name);
+      assert.isTrue(artifactExists1);
+      const { abi: abi1 } = await hre.artifacts.readArtifact(hre.config.diamondAbi[0].name);
+      assert.sameMembers(getAbiNames(abi1), ["foo"]);
+
+      // Check the second diamond.
+      const artifactExists2 = await hre.artifacts.artifactExists(hre.config.diamondAbi[1].name);
+      assert.isTrue(artifactExists2);
+      const { abi: abi2 } = await hre.artifacts.readArtifact(hre.config.diamondAbi[1].name);
+      assert.sameMembers(getAbiNames(abi2), ["bar"]);
     });
 
     it("excludes any `exclude` contracts when generating an artifact", async function () {
@@ -221,9 +280,9 @@ describe("hardhat-diamond-abi", function () {
 
       await hre.run(TASK_COMPILE);
 
-      const artifactExists = await hre.artifacts.artifactExists(hre.config.diamondAbi.name);
+      const artifactExists = await hre.artifacts.artifactExists(hre.config.diamondAbi[0].name);
       assert.isTrue(artifactExists);
-      const { abi } = await hre.artifacts.readArtifact(hre.config.diamondAbi.name);
+      const { abi } = await hre.artifacts.readArtifact(hre.config.diamondAbi[0].name);
       assert.sameMembers(getAbiNames(abi), ["bar"]);
     });
 
@@ -234,9 +293,9 @@ describe("hardhat-diamond-abi", function () {
 
       await hre.run(TASK_COMPILE);
 
-      const artifactExists = await hre.artifacts.artifactExists(hre.config.diamondAbi.name);
+      const artifactExists = await hre.artifacts.artifactExists(hre.config.diamondAbi[0].name);
       assert.isTrue(artifactExists);
-      const { abi } = await hre.artifacts.readArtifact(hre.config.diamondAbi.name);
+      const { abi } = await hre.artifacts.readArtifact(hre.config.diamondAbi[0].name);
       assert.sameMembers(getAbiNames(abi), ["foo"]);
     });
 
@@ -251,7 +310,7 @@ describe("hardhat-diamond-abi", function () {
         assert.equal(err.message, "Failed to create HardhatDiamond ABI - `baz()` appears twice.");
       }
 
-      const artifactExists = await hre.artifacts.artifactExists(hre.config.diamondAbi.name);
+      const artifactExists = await hre.artifacts.artifactExists(hre.config.diamondAbi[0].name);
       assert.isFalse(artifactExists);
     });
 
@@ -262,9 +321,9 @@ describe("hardhat-diamond-abi", function () {
 
       await hre.run(TASK_COMPILE);
 
-      const artifactExists = await hre.artifacts.artifactExists(hre.config.diamondAbi.name);
+      const artifactExists = await hre.artifacts.artifactExists(hre.config.diamondAbi[0].name);
       assert.isTrue(artifactExists);
-      const { abi } = await hre.artifacts.readArtifact(hre.config.diamondAbi.name);
+      const { abi } = await hre.artifacts.readArtifact(hre.config.diamondAbi[0].name);
       assert.sameMembers(getAbiNames(abi), ["foo", "baz", "bar", "baz"]);
     });
 
@@ -275,7 +334,7 @@ describe("hardhat-diamond-abi", function () {
 
       await hre.run(TASK_COMPILE);
 
-      const artifactExists = await hre.artifacts.artifactExists(hre.config.diamondAbi.name);
+      const artifactExists = await hre.artifacts.artifactExists(hre.config.diamondAbi[0].name);
       assert.isTrue(artifactExists);
 
       try {
@@ -285,7 +344,7 @@ describe("hardhat-diamond-abi", function () {
         assert.fail(err.message);
       }
 
-      const { abi } = await hre.artifacts.readArtifact(hre.config.diamondAbi.name);
+      const { abi } = await hre.artifacts.readArtifact(hre.config.diamondAbi[0].name);
       assert.sameMembers(getAbiNames(abi), ["foo", "bar"]);
     });
   });
