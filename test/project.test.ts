@@ -65,7 +65,7 @@ describe("hardhat-diamond-abi", function () {
       assert.equal(this.hre.config.diamondAbi[0].name, "HardhatOverrides");
     });
 
-    it("defaults undefined config", function () {
+    it("overrides other config", function () {
       // include
       assert.isArray(this.hre.config.diamondAbi[0].include);
       assert.sameOrderedMembers(this.hre.config.diamondAbi[0].include, ["Facet"]);
@@ -77,6 +77,45 @@ describe("hardhat-diamond-abi", function () {
       // strict
       assert.isBoolean(this.hre.config.diamondAbi[0].strict);
       assert.isFalse(this.hre.config.diamondAbi[0].strict);
+    });
+  });
+
+  describe("Test multi config", function () {
+    beforeEach("Loading hardhat environment", function () {
+      process.chdir(path.join(__dirname, "fixture-projects", "hardhat-multi-config"));
+
+      this.hre = require("hardhat");
+    });
+
+    afterEach("Resetting hardhat", function () {
+      resetHardhatContext();
+    });
+
+    it("adds `diamondAbi` to the config", function () {
+      assert.isDefined(this.hre.config.diamondAbi);
+    });
+
+    it("requires a `name` to be set", function () {
+      for (const [idx, config] of this.hre.config.diamondAbi.entries()) {
+        assert.isString(config.name);
+        assert.equal(config.name, `HardhatOverrides_${idx}`);
+      }
+    });
+
+    it("overrides other config", function () {
+      for (const [idx, config] of this.hre.config.diamondAbi.entries()) {
+        // include
+        assert.isArray(config.include);
+        assert.sameOrderedMembers(config.include, [`Facet_${idx}`]);
+        // exclude
+        assert.isArray(config.exclude);
+        assert.sameOrderedMembers(config.exclude, [`Exclude_${idx}`]);
+        // filter
+        assert.isFunction(config.filter);
+        // strict
+        assert.isBoolean(config.strict);
+        assert.isFalse(config.strict);
+      }
     });
   });
 
