@@ -1,5 +1,16 @@
 # Changelog
 
+## [3.0.0](https://www.github.com/projectsophon/hardhat-diamond-abi/compare/v2.0.1...v3.0.0) (2022-06-16)
+
+
+### ⚠ BREAKING CHANGES
+
+* Support array of multiple configs (#9)
+
+### Features
+
+* Support array of multiple configs ([#9](https://www.github.com/projectsophon/hardhat-diamond-abi/issues/9)) ([6a9dadb](https://www.github.com/projectsophon/hardhat-diamond-abi/commit/6a9dadbec82bb2ba792552df0f92ffd379f60880))
+
 ### [2.0.1](https://www.github.com/projectsophon/hardhat-diamond-abi/compare/v2.0.0...v2.0.1) (2022-06-15)
 
 ### Bug Fixes
