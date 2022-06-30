@@ -228,7 +228,12 @@ export async function generateDiamondAbi(
           if (abiElement.type === "constructor") {
             return false;
           }
-
+          if (abiElement.type === "fallback") {
+            return false;
+          }
+          if (abiElement.type === "receive") {
+            return false;
+          }
           if (typeof config.filter === "function") {
             return config.filter(abiElement, index, abi, contractName);
           }

@@ -227,6 +227,32 @@ describe("hardhat-diamond-abi", function () {
       assert.sameMembers(getAbiNames(abi), ["foo", "bar"]);
     });
 
+    it("always removes receive when generating an artifact", async function () {
+      process.chdir(path.join(__dirname, "fixture-projects", "hardhat-contracts-receive"));
+
+      const hre = require("hardhat");
+
+      await hre.run(TASK_COMPILE);
+
+      const artifactExists = await hre.artifacts.artifactExists(hre.config.diamondAbi[0].name);
+      assert.isTrue(artifactExists);
+      const { abi } = await hre.artifacts.readArtifact(hre.config.diamondAbi[0].name);
+      assert.sameMembers(getAbiNames(abi), ["foo", "bar"]);
+    });
+
+    it("always removes fallback when generating an artifact", async function () {
+      process.chdir(path.join(__dirname, "fixture-projects", "hardhat-contracts-fallback"));
+
+      const hre = require("hardhat");
+
+      await hre.run(TASK_COMPILE);
+
+      const artifactExists = await hre.artifacts.artifactExists(hre.config.diamondAbi[0].name);
+      assert.isTrue(artifactExists);
+      const { abi } = await hre.artifacts.readArtifact(hre.config.diamondAbi[0].name);
+      assert.sameMembers(getAbiNames(abi), ["foo", "bar"]);
+    });
+
     it("includes events and errors when generating an artifact", async function () {
       process.chdir(path.join(__dirname, "fixture-projects", "hardhat-contracts-events-errors"));
 
