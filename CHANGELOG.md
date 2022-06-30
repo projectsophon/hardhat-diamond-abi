@@ -2,10 +2,9 @@
 
 ### [3.0.1](https://www.github.com/projectsophon/hardhat-diamond-abi/compare/v3.0.0...v3.0.1) (2022-06-30)
 
-
 ### Bug Fixes
 
-* Filter fallback & receive functions from the ABI ([#14](https://www.github.com/projectsophon/hardhat-diamond-abi/issues/14)) ([97c4e62](https://www.github.com/projectsophon/hardhat-diamond-abi/commit/97c4e62c2f250eb83d3364156395069d1527deef))
+- Filter fallback & receive functions from the ABI ([#14](https://www.github.com/projectsophon/hardhat-diamond-abi/issues/14)) ([97c4e62](https://www.github.com/projectsophon/hardhat-diamond-abi/commit/97c4e62c2f250eb83d3364156395069d1527deef))
 
 ## [3.0.0](https://www.github.com/projectsophon/hardhat-diamond-abi/compare/v2.0.1...v3.0.0) (2022-06-16)
 
