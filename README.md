@@ -47,6 +47,11 @@ As mentioned above, this plugin uses the same hook as TypeChain. If you **load t
 
 It is very important that you import this plugin before TypeChain, otherwise it won't see our artifact when it generates types.
 
+```diff
++ import "hardhat-diamond-abi";
+import "@typechain/hardhat"; // <-- Typechain plugin imported after hardhat-diamond-abi
+```
+
 ## Basic configuration
 
 Set up your project (we'll use `best_dapp_ever/`) with the following minimal `hardhat.config.js` at the root. The only required property is `name`, which is used to name your Diamond ABI.
